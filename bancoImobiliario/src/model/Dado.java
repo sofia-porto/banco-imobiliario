@@ -5,7 +5,7 @@ import java.util.Random;
 class Dado {
     private Random random;
 
-    Dado() {
+    public Dado() {
         random = new Random();
     }
 

@@ -1,5 +1,7 @@
 package model;
 
+import java.util.ArrayList;
+
 class Banco {
     private double saldo;
 

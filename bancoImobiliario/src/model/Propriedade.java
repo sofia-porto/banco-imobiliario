@@ -23,6 +23,8 @@ class Propriedade {
 
     double getPreco() { return preco; }
 
+    int getCasas() { return casas; }
+
     double calcularAluguel() {
         if (hotel) return aluguelBase * 5;
         return aluguelBase * (1 + casas);

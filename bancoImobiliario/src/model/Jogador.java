@@ -10,10 +10,9 @@ class Jogador {
     private boolean preso;
     private boolean falido;
     private boolean temCartaoSaidaLivre;
-    private int duplasSeguidas; // controla quantas duplas o jogador tirou
+    private int duplasSeguidas;
     private Set<Propriedade> propriedades;
 
-    // Construtor
     Jogador(String nome, double saldoInicial) {
         this.nome = nome;
         this.saldo = saldoInicial;
@@ -24,8 +23,6 @@ class Jogador {
         this.temCartaoSaidaLivre = false;
         this.propriedades = new HashSet<>();
     }
-
-    // ========= AÇÕES BÁSICAS =========
 
     void mover(int casas, int tamanhoTabuleiro) {
         if (!preso) {
@@ -56,17 +53,13 @@ class Jogador {
         }
     }
 
-    // ========= PRISÃO: ENTRAR =========
-
-    // (a) Cair na casa "Vá para a Prisão"
-    void prender() {
+    void prender() { // Cair na casa "Vá para a Prisão"
         preso = true;
         posicao = 9; // posição da casa "Prisão" conforme tabuleiro real
         duplasSeguidas = 0;
     }
 
-    // (b) Tirar três duplas seguidas
-    void registrarDupla() {
+    void registrarDupla() { // Tirar três duplas seguidas
         duplasSeguidas++;
         if (duplasSeguidas == 3) {
             prender();
@@ -77,18 +70,14 @@ class Jogador {
         duplasSeguidas = 0;
     }
 
-    // ========= PRISÃO: SAIR =========
-
-    // (c) Sair da prisão tirando uma dupla
-    void tentarSairDaPrisaoComDupla() {
+    void tentarSairDaPrisaoComDupla() { // Sair da prisão tirando uma dupla
         if (preso) {
             preso = false;
             duplasSeguidas = 0;
         }
     }
 
-    // (d) Sair com o cartão “Saída Livre da Prisão”
-    void usarCartaoSaidaLivre() {
+    void usarCartaoSaidaLivre() { // Sair com o cartão “Saída Livre da Prisão”
         if (preso && temCartaoSaidaLivre) {
             preso = false;
             temCartaoSaidaLivre = false; // consome o cartão
@@ -102,8 +91,6 @@ class Jogador {
     void tentarEvitarFalencia() {
     	//TODO: Implementar na próxima iteração
     }
-
-    // ========= STATUS DO JOGADOR =========
 
     boolean estaPreso() { return preso; }
     boolean estaFalido() { return falido; }

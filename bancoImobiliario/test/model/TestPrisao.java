@@ -5,55 +5,49 @@ import org.junit.Test;
 
 public class TestPrisao {
 
-    // (a) Jogador cai na casa "Vá para a Prisão"
-    @Test
+    @Test // Jogador cai na casa "Vá para a Prisão"
     public void testCairNaCasaVaParaPrisao() {
         Tabuleiro tabuleiro = new Tabuleiro();
         Jogador j = new Jogador("Ana", 4000);
 
-        // Simula o movimento até a casa "Vá para a Prisão"
-        // (posição conforme planilha: índice 25)
         j.mover(25, tabuleiro.tamanho());
         tabuleiro.verificarCasaAtual(j);
         
         assertTrue(j.estaPreso());
-        assertEquals(9, j.getPosicao()); // enviado para a casa "Prisão"
+        assertEquals(9, j.getPosicao());
     }
 
-    // (b) Jogador tira 3 duplas seguidas
-    @Test
+    @Test // Jogador tira 3 duplas seguidas
     public void testTresDuplasSeguidasVaiParaPrisao() {
         Jogador j = new Jogador("Ana", 4000);
 
-        // Simula tirar três duplas seguidas
         j.registrarDupla();
         j.registrarDupla();
-        j.registrarDupla(); // deve prender
+        j.registrarDupla(); 
 
         assertTrue(j.estaPreso());
         assertEquals(9, j.getPosicao());
     }
 
-    // (c) Jogador sai da prisão tirando uma dupla
-    @Test
+    @Test //Jogador sai da prisão tirando uma dupla
     public void testSairDaPrisaoComDupla() {
         Jogador j = new Jogador("Ana", 4000);
-        j.prender(); // começa preso
+        j.prender(); 
 
         j.tentarSairDaPrisaoComDupla();
 
         assertFalse(j.estaPreso());
     }
 
-    // (d) Jogador sai da prisão usando o cartão "Saída Livre da Prisão"
-    @Test
+    @Test // Jogador sai da prisão usando o cartão "Saída Livre da Prisão"
     public void testSairDaPrisaoComCartao() {
         Jogador j = new Jogador("Ana", 4000);
-        j.prender(); // está preso
-        j.receberCartaoSaidaLivre(); // recebe o cartão
-        j.usarCartaoSaidaLivre(); // usa o cartão
+        j.prender(); 
+        j.receberCartaoSaidaLivre();
+        j.usarCartaoSaidaLivre();
 
         assertFalse(j.estaPreso());
         assertFalse(j.temCartaoSaidaLivre());
     }
 }
+

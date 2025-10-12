@@ -61,7 +61,7 @@ class Jogador {
     // (a) Cair na casa "Vá para a Prisão"
     void prender() {
         preso = true;
-        posicao = 8; // posição da casa "Prisão" conforme tabuleiro real
+        posicao = 9; // posição da casa "Prisão" conforme tabuleiro real
         duplasSeguidas = 0;
     }
 

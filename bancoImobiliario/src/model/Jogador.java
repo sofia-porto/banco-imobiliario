@@ -1,7 +1,7 @@
 package model;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 class Jogador {
     private String nome;
@@ -11,7 +11,7 @@ class Jogador {
     private boolean falido;
     private boolean temCartaoSaidaLivre;
     private int duplasSeguidas; // controla quantas duplas o jogador tirou
-    private List<Propriedade> propriedades;
+    private Set<Propriedade> propriedades;
 
     // Construtor
     Jogador(String nome, double saldoInicial) {
@@ -22,7 +22,7 @@ class Jogador {
         this.falido = false;
         this.duplasSeguidas = 0;
         this.temCartaoSaidaLivre = false;
-        this.propriedades = new ArrayList<>();
+        this.propriedades = new HashSet<>();
     }
 
     // ========= AÇÕES BÁSICAS =========
@@ -113,5 +113,5 @@ class Jogador {
     double getSaldo() { return saldo; }
     String getNome() { return nome; }
 
-    List<Propriedade> getPropriedades() { return propriedades; }
+    Set<Propriedade> getPropriedades() { return propriedades; }
 }

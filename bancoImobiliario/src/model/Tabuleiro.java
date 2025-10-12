@@ -78,4 +78,14 @@ class Tabuleiro {
                 break;
         }
     }
+    
+    void processaAluguel(Jogador jogador) {
+        Propriedade casaAtual = casas.get(jogador.getPosicao());
+        if (casaAtual.temDono() && casaAtual.getDono() != jogador && casaAtual.getCasas() > 0) {
+            double aluguel = casaAtual.calcularAluguel();
+            jogador.pagar(aluguel);
+            casaAtual.getDono().receber(aluguel);
+        }
+    }
+
 }

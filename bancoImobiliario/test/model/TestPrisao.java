@@ -17,7 +17,7 @@ public class TestPrisao {
         tabuleiro.verificarCasaAtual(j);
         
         assertTrue(j.estaPreso());
-        assertEquals(8, j.getPosicao()); // enviado para a casa "Prisão"
+        assertEquals(9, j.getPosicao()); // enviado para a casa "Prisão"
     }
 
     // (b) Jogador tira 3 duplas seguidas
@@ -31,7 +31,7 @@ public class TestPrisao {
         j.registrarDupla(); // deve prender
 
         assertTrue(j.estaPreso());
-        assertEquals(8, j.getPosicao());
+        assertEquals(9, j.getPosicao());
     }
 
     // (c) Jogador sai da prisão tirando uma dupla

@@ -26,18 +26,4 @@ public class TestConstrucaoCasa {
         p.construirCasa();
         assertEquals(4, p.getCasas()); // não ultrapassa
     }
-
-    @Test
-    public void testNaoConstruiMaisQueQuatro() {
-        Propriedade p = new Propriedade("Copacabana", 200, 20);
-
-        // Constrói 4 casas
-        for (int i = 0; i < 4; i++) p.construirCasa();
-
-        // Tenta construir mais uma
-        p.construirCasa();
-
-        // Continua 4
-        assertEquals(4, p.getCasas());
-    }
 }

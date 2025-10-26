@@ -39,4 +39,5 @@ class Propriedade {
     }
 
     String getNome() { return nome; }
+    boolean temHotel() { return hotel; }
 }

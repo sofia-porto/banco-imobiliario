@@ -5,6 +5,7 @@ import java.util.Map;
 
 class Tabuleiro {
     private Map<Integer, Propriedade> casas;
+    private BaralhoSorteReves baralho = new BaralhoSorteReves();
 
     Tabuleiro() {
         casas = new HashMap<>();
@@ -47,7 +48,7 @@ class Tabuleiro {
         casas.put(32, new Propriedade("Companhia de Aviação", 200, 25));
         casas.put(33, new Propriedade("Av. Vieira Souto", 320, 32));
         casas.put(34, new Propriedade("Av. Atlântica", 300, 30));
-        casas.put(35, new Propriedade("Companhia de Taxi Aéreo", 150, 15));
+        casas.put(35, new Propriedade("Companhia de Taxi Aéreo", 200, 15));
         casas.put(36, new Propriedade("Ipanema", 300, 30));
         casas.put(37, new Propriedade("Sorte ou Revés", 0, 0));
         casas.put(38, new Propriedade("Jardim Paulista", 280, 28));
@@ -77,10 +78,58 @@ class Tabuleiro {
             case "Lucros ou Dividendos":
                 jogador.receber(200);
                 break;
+            case "Sorte ou Revés":
+                Carta carta = baralho.sortearCarta();
+                carta.aplicar(jogador, Jogo.getInstancia());
+                jogador.setUltimaCarta(carta.getId());
+                Jogo.getInstancia().setUltimaCartaGlobal(carta.getId());
+                break;      	
             case "Prisão":
             case "Parada Livre":
                 break;
             default:
+                Propriedade prop = casa;
+                if (!prop.temDono()) {
+                    jogador.comprarPropriedade(prop);
+                } else if (prop.getDono() == jogador) {
+                    double custoConstrucao = prop.getPreco() * 0.5;
+
+                    if (prop.getCasas() < 4) {
+                        if (jogador.getSaldo() >= custoConstrucao) {
+                            jogador.pagar(custoConstrucao);
+                            prop.construirCasa();
+                            System.out.println("🏠 " + jogador.getNome() + " construiu uma casa em " + prop.getNome() +
+                                    " → total de casas: " + prop.getCasas() +
+                                    " → saldo: R$" + jogador.getSaldo());
+                        } else {
+                            System.out.println("🚫 " + jogador.getNome() + " não tem saldo para construir em " + prop.getNome());
+                        }
+                    } 
+                    else if (prop.getCasas() == 4 && !prop.temHotel()) {
+                        if (jogador.getSaldo() >= custoConstrucao * 2) {
+                            jogador.pagar(custoConstrucao * 2);
+                            prop.construirHotel();
+                            System.out.println("🏨 " + jogador.getNome() + " construiu um HOTEL em " + prop.getNome() +
+                                    " → saldo: R$" + jogador.getSaldo());
+                        } else {
+                            System.out.println("🚫 " + jogador.getNome() + " não tem saldo para construir o hotel em " + prop.getNome());
+                        }
+                    } 
+                    else if (prop.temHotel()) {
+                        System.out.println("🏡 " + prop.getNome() + " já possui um hotel. Nenhuma construção possível.");
+                    }
+                } else {
+                    Jogador dono = prop.getDono();
+                    double aluguel = prop.calcularAluguel();
+
+                    jogador.pagar(aluguel);
+                    dono.receber(aluguel);
+
+                    System.out.println("💸 " + jogador.getNome() + " caiu em " + prop.getNome() + ", que pertence a " + dono.getNome());
+                    System.out.println("➡️ Pagou R$" + aluguel + " de aluguel.");
+                    System.out.println("💰 Saldo de " + jogador.getNome() + ": R$" + jogador.getSaldo());
+                    System.out.println("🏦 Saldo de " + dono.getNome() + ": R$" + dono.getSaldo());
+                }
                 break;
         }
     }

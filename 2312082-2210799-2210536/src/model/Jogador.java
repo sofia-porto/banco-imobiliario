@@ -13,6 +13,7 @@ class Jogador {
     private int duplasSeguidas;
     private Set<Propriedade> propriedades;
     private Piao piao;
+    private String ultimaCartaId;
 
     Jogador(String nome, double saldoInicial, String corPiao) {
         this.nome = nome;
@@ -41,10 +42,12 @@ class Jogador {
             	falido = true;
             }
         }
+        System.out.println("💰 Jogador pagou R$" + valor + " → saldo: R$" + saldo);
     }
 
     void receber(double valor) {
         saldo += valor;
+        System.out.println("💰 Jogador recebeu R$" + valor + " → saldo: R$" + saldo);
     }
 
     void comprarPropriedade(Propriedade p) {
@@ -52,13 +55,18 @@ class Jogador {
             pagar(p.getPreco());
             p.setDono(this);
             propriedades.add(p);
+            System.out.println(" Jogador comprou a propriedade " + p.getNome() + " → saldo: R$" + saldo);
         }
     }
 
     void prender() { // Cair na casa "Vá para a Prisão"
-        preso = true;
-        posicao = 9; // posição da casa "Prisão" conforme tabuleiro real
-        duplasSeguidas = 0;
+    	if (temCartaoSaidaLivre) {
+    		usarCartaoSaidaLivre();
+    	} else {
+    		  preso = true;
+    	      posicao = 10; // posição da casa "Prisão" conforme tabuleiro real
+    	      duplasSeguidas = 0;
+    	}
     }
 
     void registrarDupla() { // Tirar três duplas seguidas
@@ -83,11 +91,13 @@ class Jogador {
         if (preso && temCartaoSaidaLivre) {
             preso = false;
             temCartaoSaidaLivre = false; // consome o cartão
+            System.out.println("🃏 Você usou sua carta de Saída da Prisão!");
         }
     }
 
     void receberCartaoSaidaLivre() {
         temCartaoSaidaLivre = true;
+        System.out.println("🃏 Você recebeu uma carta de Saída da Prisão!");
     }
     
     void tentarEvitarFalencia() {
@@ -104,6 +114,8 @@ class Jogador {
 
     Set<Propriedade> getPropriedades() { return propriedades; }
     
+    public void setUltimaCarta(String id) { this.ultimaCartaId = id; }
+    public String getUltimaCarta() { return ultimaCartaId; }
 
     public Piao getPiao() {
         return piao;

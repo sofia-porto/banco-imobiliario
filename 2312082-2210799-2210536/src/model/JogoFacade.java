@@ -24,6 +24,10 @@ public class JogoFacade {
     public Jogador getJogadorAtual() {
         return jogo.getJogadorAtual();
     }
+    
+    public String getUltimaCartaGlobal() {
+        return jogo.getUltimaCartaGlobal();
+    }
 
     public List<Jogador> getJogadores() {
         return jogo.getJogadores();
@@ -46,6 +50,13 @@ public class JogoFacade {
             return jogo.getJogadores().get(indice).getNome();
         }
         return "";
+    }
+    
+    public int getJogadorPosicao(int indice) {
+        if (indice >= 0 && indice < jogo.getJogadores().size()) {
+            return jogo.getJogadores().get(indice).getPosicao();
+        }
+        return 0;
     }
 
     /** Lança dois dados e retorna um array com os resultados */

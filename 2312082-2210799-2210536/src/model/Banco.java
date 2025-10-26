@@ -9,10 +9,12 @@ class Banco {
 
     void receber(double valor) {
         saldo += valor;
+        System.out.println("🏦 Banco recebeu R$" + valor + " → saldo: R$" + saldo);
     }
 
     void pagar(double valor) {
         saldo -= valor;
+        System.out.println("🏦 Banco pagou R$" + valor + " → saldo: R$" + saldo);
     }
 
     double getSaldo() {

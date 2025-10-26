@@ -28,6 +28,7 @@ class Jogo {
     private Tabuleiro tabuleiro;
     private int jogadorAtual; // índice do jogador da vez
     private List<Observer> observadores = new ArrayList<>();
+    private String ultimaCartaGlobal;
 
     // ===================== MÉTODOS DO JOGO =====================
     public void adicionarJogador(Jogador j) {
@@ -67,7 +68,16 @@ class Jogo {
             atual.mover(casas, tabuleiro.tamanho());
             tabuleiro.verificarCasaAtual(atual);
             notificarObservadores();
+            avancarJogadorDaVez();
         }
+    }
+    
+    public void setUltimaCartaGlobal(String id) {
+        ultimaCartaGlobal = id;
+    }
+
+    public String getUltimaCartaGlobal() {
+        return ultimaCartaGlobal;
     }
 
     // ===================== OBSERVER =====================

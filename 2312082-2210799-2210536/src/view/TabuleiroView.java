@@ -4,6 +4,9 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.imageio.ImageIO;
 import model.JogoFacade;
 import model.Observer;
@@ -18,6 +21,7 @@ public class TabuleiroView extends Canvas implements KeyListener, MouseListener,
     private Image[] imagensPioes = new Image[6];
     private int[] posicoes;
     private int jogadorDaVezView = 0;
+    private Map<String, Image> imagensCartas = new HashMap<>();
 
     // Constantes geométricas do tabuleiro
     private static final int TOTAL_CASAS = 40;
@@ -29,6 +33,7 @@ public class TabuleiroView extends Canvas implements KeyListener, MouseListener,
         addMouseListener(this);
         setFocusable(true);
         carregarImagens();
+        carregarCartas();
 
         jogo.adicionarObservador(this);
 
@@ -39,12 +44,12 @@ public class TabuleiroView extends Canvas implements KeyListener, MouseListener,
 
     private void carregarImagens() {
         try {
-            URL urlTabuleiro = getClass().getResource("/view/tabuleiro.png");
+            URL urlTabuleiro = getClass().getResource("/resources/tabuleiro.png");
             System.out.println("🔍 Caminho da imagem: " + urlTabuleiro);
             imagemTabuleiro = ImageIO.read(urlTabuleiro);
 
             for (int i = 0; i < imagensPioes.length; i++) {
-                URL u = getClass().getResource("/view/pin" + i + ".png");
+                URL u = getClass().getResource("/resources/pin" + i + ".png");
                 if (u != null) {
                     imagensPioes[i] = ImageIO.read(u);
                     System.out.println("✅ Pião " + i + " carregado de " + u);
@@ -55,6 +60,23 @@ public class TabuleiroView extends Canvas implements KeyListener, MouseListener,
         } catch (IOException e) {
             System.out.println("⚠️ Imagem do tabuleiro ou piões não encontrada.");
             imagemTabuleiro = null;
+        }
+    }
+    
+    private void carregarCartas() {
+        for (int i = 1; i <= 30; i++) {
+            String id = "chance" + i;
+            try {
+                URL u = getClass().getResource("/resources/" + id + ".png");
+                if (u != null) {
+                    imagensCartas.put(id, ImageIO.read(u));
+                    System.out.println("✅ Carta " + id + " carregada");
+                } else {
+                    System.out.println("⚠️ Carta " + id + " não encontrada");
+                }
+            } catch (IOException e) {
+                System.out.println("⚠️ Erro ao carregar imagem " + id);
+            }
         }
     }
 
@@ -78,12 +100,9 @@ public class TabuleiroView extends Canvas implements KeyListener, MouseListener,
     @Override
     public void paint(Graphics g) {
         Graphics2D g2 = (Graphics2D) g;
-
-        // fundo branco
         g2.setColor(Color.WHITE);
         g2.fillRect(0, 0, getWidth(), getHeight());
 
-        // desenha tabuleiro
         if (imagemTabuleiro != null) {
             g2.drawImage(imagemTabuleiro, 80, 50, TAMANHO, TAMANHO, this);
         } else {
@@ -94,15 +113,14 @@ public class TabuleiroView extends Canvas implements KeyListener, MouseListener,
             g2.drawString("TABULEIRO", 380, 400);
         }
 
-        // desenha piões (um por pista)
         int numJogadores = jogo.getNumeroJogadores();
         for (int i = 0; i < numJogadores; i++) {
-            int pos = posicoes[i];
+            int pos = jogo.getJogadorPosicao(i);
             Point p = getCoordenadaDaCasa(pos, i);
             Image img = imagensPioes[i];
 
             if (img != null) {
-            	g2.drawImage(img, p.x + 32, p.y + 32, 24, 24, this);
+                g2.drawImage(img, p.x + 32, p.y + 32, 24, 24, this);
             } else {
                 g2.setColor(Color.BLACK);
                 g2.fillOval(p.x, p.y, 20, 20);
@@ -113,6 +131,16 @@ public class TabuleiroView extends Canvas implements KeyListener, MouseListener,
             g2.drawString(jogo.getJogadorNome(i), p.x, p.y + 40);
         }
 
+        String idCarta = jogo.getUltimaCartaGlobal();
+        if (idCarta != null) {
+            Image cartaImg = imagensCartas.get(idCarta);
+            if (cartaImg != null) {
+                g2.drawImage(cartaImg, 370, 300, 200, 200, this);
+
+                g2.setColor(Color.BLACK);
+                g2.drawRect(370, 300, 200, 200);
+            }
+        }
         g2.setFont(new Font("Arial", Font.BOLD, 16));
         g2.setColor(Color.BLACK);
         g2.drawString("Pressione ESPAÇO para lançar os dados", 200, 30);
@@ -154,23 +182,19 @@ public class TabuleiroView extends Canvas implements KeyListener, MouseListener,
             y = yIni + ((idx - 30) * passo);
         }
 
-        // ajuste de offset global do tabuleiro na tela
         return new Point(80 + x, 50 + y);
     }
 
     @Override
     public void keyPressed(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-            int[] dados = jogo.lancarDados();
-            int soma = dados[0] + dados[1];
-            System.out.println("🎲 Lançamento: " + dados[0] + " + " + dados[1] + " = " + soma);
+    	if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+    	    int[] dados = jogo.lancarDados();
+    	    int soma = dados[0] + dados[1];
+    	    System.out.println("🎲 Lançamento: " + dados[0] + " + " + dados[1] + " = " + soma);
 
-            posicoes[jogadorDaVezView] = (posicoes[jogadorDaVezView] + soma) % TOTAL_CASAS;
-            jogo.moverJogadorAtual(soma);
-            jogadorDaVezView = (jogadorDaVezView + 1) % jogo.getNumeroJogadores();
-
-            repaint();
-        }
+    	    jogo.moverJogadorAtual(soma);
+    	    jogadorDaVezView = (jogadorDaVezView + 1) % jogo.getNumeroJogadores();
+    	}
     }
 
     @Override public void atualizar() { repaint(); }

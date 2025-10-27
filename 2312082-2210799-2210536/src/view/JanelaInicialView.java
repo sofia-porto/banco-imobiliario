@@ -11,7 +11,7 @@ public class JanelaInicialView extends Canvas implements KeyListener, MouseListe
     private int numeroJogadores = 0;
     private String mensagem = "Digite um número de jogadores (3 a 6) e pressione Enter";
 
-    private Frame janela; // substitui JFrame
+    private Frame janela;
     private boolean ativo = true;
 
     public JanelaInicialView(JogoFacade jogo) {
@@ -33,7 +33,6 @@ public class JanelaInicialView extends Canvas implements KeyListener, MouseListe
             }
         });
 
-        // Loop de renderização (sem Swing)
         while (ativo) {
             repaint();
             try { Thread.sleep(16); } catch (InterruptedException e) {}
@@ -44,11 +43,9 @@ public class JanelaInicialView extends Canvas implements KeyListener, MouseListe
     public void paint(Graphics g) {
         Graphics2D g2 = (Graphics2D) g;
 
-        // fundo branco
         g2.setColor(Color.WHITE);
         g2.fillRect(0, 0, getWidth(), getHeight());
 
-        // título e mensagens
         g2.setColor(Color.BLACK);
         g2.setFont(new Font("Arial", Font.BOLD, 18));
         g2.drawString(mensagem, 80, 150);
@@ -82,7 +79,6 @@ public class JanelaInicialView extends Canvas implements KeyListener, MouseListe
             ativo = false;
             janela.dispose();
 
-            // abre tabuleiro sem Swing
             TabuleiroView tabuleiro = new TabuleiroView(jogo);
             tabuleiro.exibir();
         } else {
@@ -97,11 +93,4 @@ public class JanelaInicialView extends Canvas implements KeyListener, MouseListe
     @Override public void mouseReleased(MouseEvent e) {}
     @Override public void mouseEntered(MouseEvent e) {}
     @Override public void mouseExited(MouseEvent e) {}
-
-    // Método main para testar isoladamente
-    public static void main(String[] args) {
-        JogoFacade jogo = new JogoFacade();
-        JanelaInicialView janela = new JanelaInicialView(jogo);
-        janela.exibir();
-    }
 }

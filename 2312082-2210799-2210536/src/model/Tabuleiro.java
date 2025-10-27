@@ -17,18 +17,18 @@ class Tabuleiro {
         casas.put(1,  new Propriedade("Leblon", 100, 10));
         casas.put(2,  new Propriedade("Sorte ou Revés", 0, 0));
         casas.put(3,  new Propriedade("Av. Presidente Vargas", 60, 6));
-        casas.put(4,  new Propriedade("Av. Nossa Sra. de Copacabana", 60, 6));
-        casas.put(5,  new Propriedade("Companhia Ferroviária", 200, 25));
-        casas.put(6,  new Propriedade("Av. Brigadeiro Faria Lima", 240, 24));
-        casas.put(7,  new Propriedade("Companhia de Viação", 200, 25));
-        casas.put(8,  new Propriedade("Av. Rebouças", 220, 22));
+        casas.put(4,  new Propriedade("Av. Nossa S. de Copacabana", 60, 6));
+        casas.put(5,  new Propriedade("company1", 200, 25));
+        casas.put(6,  new Propriedade("Av. Brigadero Faria Lima", 240, 24));
+        casas.put(7,  new Propriedade("company2", 200, 25));
+        casas.put(8,  new Propriedade("Av. Rebou‡as", 220, 22));
         casas.put(9,  new Propriedade("Av. 9 de Julho", 220, 22));
         casas.put(10, new Propriedade("Prisão", 0, 0));
         casas.put(11, new Propriedade("Av. Europa", 200, 20));
         casas.put(12, new Propriedade("Sorte ou Revés", 0, 0));
         casas.put(13, new Propriedade("Rua Augusta", 180, 18));
-        casas.put(14, new Propriedade("Av. Pacaembu", 180, 18));
-        casas.put(15, new Propriedade("Companhia de Táxi", 150, 15));
+        casas.put(14, new Propriedade("Av. Pacaemb｣", 180, 18));
+        casas.put(15, new Propriedade("company3", 150, 15));
         casas.put(16, new Propriedade("Sorte ou Revés", 0, 0));
         casas.put(17, new Propriedade("Interlagos", 350, 35));
         casas.put(18, new Propriedade("Lucros e Dividendos", 0, 0));
@@ -38,17 +38,17 @@ class Tabuleiro {
         casas.put(22, new Propriedade("Sorte ou Revés", 0, 0)); 
         casas.put(23, new Propriedade("Botafogo", 100, 10));
         casas.put(24, new Propriedade("Imposto de Renda", 0, 0));
-        casas.put(25, new Propriedade("Companhia de Navegação", 150, 15));
+        casas.put(25, new Propriedade("company4", 150, 15));
         casas.put(26, new Propriedade("Av. Brasil", 160, 16));
         casas.put(27, new Propriedade("Sorte ou Revés", 0, 0));
         casas.put(28, new Propriedade("Av. Paulista", 140, 14));
         casas.put(29, new Propriedade("Jardim Europa", 140, 14));
         casas.put(30, new Propriedade("Vá para a Prisão", 0, 0));
         casas.put(31, new Propriedade("Copacabana", 260, 26));
-        casas.put(32, new Propriedade("Companhia de Aviação", 200, 25));
+        casas.put(32, new Propriedade("company5", 200, 25));
         casas.put(33, new Propriedade("Av. Vieira Souto", 320, 32));
-        casas.put(34, new Propriedade("Av. Atlântica", 300, 30));
-        casas.put(35, new Propriedade("Companhia de Taxi Aéreo", 200, 15));
+        casas.put(34, new Propriedade("Av. Atlハtica", 300, 30));
+        casas.put(35, new Propriedade("company6", 200, 15));
         casas.put(36, new Propriedade("Ipanema", 300, 30));
         casas.put(37, new Propriedade("Sorte ou Revés", 0, 0));
         casas.put(38, new Propriedade("Jardim Paulista", 280, 28));
@@ -69,21 +69,26 @@ class Tabuleiro {
             case "Partida":
                 jogador.receber(200);
                 break;
+
             case "Vá para a Prisão":
                 jogador.prender();
                 break;
+
             case "Imposto de Renda":
                 jogador.pagar(200);
                 break;
+
             case "Lucros ou Dividendos":
                 jogador.receber(200);
                 break;
+
             case "Sorte ou Revés":
                 Carta carta = baralho.sortearCarta();
                 carta.aplicar(jogador, Jogo.getInstancia());
                 jogador.setUltimaCarta(carta.getId());
                 Jogo.getInstancia().setUltimaCartaGlobal(carta.getId());
-                break;      	
+                break;
+
             case "Prisão":
             case "Parada Livre":
                 break;
@@ -91,44 +96,16 @@ class Tabuleiro {
                 Propriedade prop = casa;
                 if (!prop.temDono()) {
                     jogador.comprarPropriedade(prop);
-                } else if (prop.getDono() == jogador) {
-                    double custoConstrucao = prop.getPreco() * 0.5;
-
-                    if (prop.getCasas() < 4) {
-                        if (jogador.getSaldo() >= custoConstrucao) {
-                            jogador.pagar(custoConstrucao);
-                            prop.construirCasa();
-                            System.out.println("🏠 " + jogador.getNome() + " construiu uma casa em " + prop.getNome() +
-                                    " → total de casas: " + prop.getCasas() +
-                                    " → saldo: R$" + jogador.getSaldo());
-                        } else {
-                            System.out.println("🚫 " + jogador.getNome() + " não tem saldo para construir em " + prop.getNome());
-                        }
-                    } 
-                    else if (prop.getCasas() == 4 && !prop.temHotel()) {
-                        if (jogador.getSaldo() >= custoConstrucao * 2) {
-                            jogador.pagar(custoConstrucao * 2);
-                            prop.construirHotel();
-                            System.out.println("🏨 " + jogador.getNome() + " construiu um HOTEL em " + prop.getNome() +
-                                    " → saldo: R$" + jogador.getSaldo());
-                        } else {
-                            System.out.println("🚫 " + jogador.getNome() + " não tem saldo para construir o hotel em " + prop.getNome());
-                        }
-                    } 
-                    else if (prop.temHotel()) {
-                        System.out.println("🏡 " + prop.getNome() + " já possui um hotel. Nenhuma construção possível.");
-                    }
-                } else {
+                } else if (prop.getDono() != jogador) {
                     Jogador dono = prop.getDono();
                     double aluguel = prop.calcularAluguel();
 
                     jogador.pagar(aluguel);
                     dono.receber(aluguel);
 
-                    System.out.println("💸 " + jogador.getNome() + " caiu em " + prop.getNome() + ", que pertence a " + dono.getNome());
-                    System.out.println("➡️ Pagou R$" + aluguel + " de aluguel.");
-                    System.out.println("💰 Saldo de " + jogador.getNome() + ": R$" + jogador.getSaldo());
-                    System.out.println("🏦 Saldo de " + dono.getNome() + ": R$" + dono.getSaldo());
+                    System.out.println(jogador.getNome() + " caiu em " + prop.getNome() +
+                            ", que pertence a " + dono.getNome());
+                    System.out.println("Pagou R$" + aluguel + " de aluguel.");
                 }
                 break;
         }

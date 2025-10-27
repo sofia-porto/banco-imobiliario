@@ -42,12 +42,12 @@ class Jogador {
             	falido = true;
             }
         }
-        System.out.println("💰 Jogador pagou R$" + valor + " → saldo: R$" + saldo);
+        System.out.println("Jogador pagou R$" + valor + " → saldo: R$" + saldo);
     }
 
     void receber(double valor) {
         saldo += valor;
-        System.out.println("💰 Jogador recebeu R$" + valor + " → saldo: R$" + saldo);
+        System.out.println("Jogador recebeu R$" + valor + " → saldo: R$" + saldo);
     }
 
     void comprarPropriedade(Propriedade p) {
@@ -55,21 +55,21 @@ class Jogador {
             pagar(p.getPreco());
             p.setDono(this);
             propriedades.add(p);
-            System.out.println(" Jogador comprou a propriedade " + p.getNome() + " → saldo: R$" + saldo);
+            System.out.println("Jogador comprou a propriedade " + p.getNome() + " → saldo: R$" + saldo);
         }
     }
 
-    void prender() { // Cair na casa "Vá para a Prisão"
+    void prender() {
     	if (temCartaoSaidaLivre) {
     		usarCartaoSaidaLivre();
     	} else {
     		  preso = true;
-    	      posicao = 10; // posição da casa "Prisão" conforme tabuleiro real
+    	      posicao = 10;
     	      duplasSeguidas = 0;
     	}
     }
 
-    void registrarDupla() { // Tirar três duplas seguidas
+    void registrarDupla() {
         duplasSeguidas++;
         if (duplasSeguidas == 3) {
             prender();
@@ -80,24 +80,24 @@ class Jogador {
         duplasSeguidas = 0;
     }
 
-    void tentarSairDaPrisaoComDupla() { // Sair da prisão tirando uma dupla
+    void tentarSairDaPrisaoComDupla() {
         if (preso) {
             preso = false;
             duplasSeguidas = 0;
         }
     }
 
-    void usarCartaoSaidaLivre() { // Sair com o cartão “Saída Livre da Prisão”
+    void usarCartaoSaidaLivre() {
         if (preso && temCartaoSaidaLivre) {
             preso = false;
-            temCartaoSaidaLivre = false; // consome o cartão
-            System.out.println("🃏 Você usou sua carta de Saída da Prisão!");
+            temCartaoSaidaLivre = false;
+            System.out.println("Você usou sua carta de Saída da Prisão!");
         }
     }
 
     void receberCartaoSaidaLivre() {
         temCartaoSaidaLivre = true;
-        System.out.println("🃏 Você recebeu uma carta de Saída da Prisão!");
+        System.out.println("Você recebeu uma carta de Saída da Prisão!");
     }
     
     void tentarEvitarFalencia() {
@@ -120,5 +120,4 @@ class Jogador {
     public Piao getPiao() {
         return piao;
     }
-
 }

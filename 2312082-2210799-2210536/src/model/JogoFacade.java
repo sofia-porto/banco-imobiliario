@@ -1,17 +1,14 @@
 package model;
 
-import java.util.List;
 import java.util.Random;
 
-// Facade: fornece uma interface simplificada entre o model e a view
 public class JogoFacade {
 
     private Jogo jogo = Jogo.getInstancia();
     private Random random = new Random();
 
-    // Cria jogadores e define cores fixas pela ordem de entrada
     public void criarJogadores(int qtd) {
-        String[] cores = {"#FF0000", "#0000FF", "#00FF00", "#FFFF00", "#FFA500", "#800080"}; // vermelho, azul, verde, amarelo, laranja, roxo
+        String[] cores = {"#FF0000", "#0000FF", "#00FF00", "#FFFF00", "#FFA500", "#800080"};
         for (int i = 0; i < qtd; i++) {
             jogo.adicionarJogador(new Jogador("Jogador " + (i + 1), 4000, cores[i]));
         }
@@ -21,37 +18,60 @@ public class JogoFacade {
         jogo.iniciarPartida();
     }
 
-    public Jogador getJogadorAtual() {
-        return jogo.getJogadorAtual();
-    }
-    
-    public String getUltimaCartaGlobal() {
-        return jogo.getUltimaCartaGlobal();
+   
+    public int[] lancarDados() {
+        return new int[]{random.nextInt(6) + 1, random.nextInt(6) + 1};
     }
 
-    public List<Jogador> getJogadores() {
-        return jogo.getJogadores();
+    public void moverJogadorAtual(int casas) {
+        jogo.moverJogadorAtual(casas);
     }
 
-    public void proximaJogada(int valorDado) {
-        jogo.proximaJogada(valorDado);
+    public void passarVez() {
+        jogo.limparCartaGlobal();
+        jogo.proximaJogada(0);
     }
 
-    // === Métodos adicionados para integração com a camada View ===
+    public void adicionarObservador(Observer o) {
+        jogo.adicionarObservador(o);
+    }
 
-    /** Retorna o número total de jogadores */
+    public void removerObservador(Observer o) {
+        jogo.removerObservador(o);
+    }
+
+   
     public int getNumeroJogadores() {
         return jogo.getJogadores().size();
     }
 
-    /** Retorna o nome do jogador pelo índice */
+    public int getIndiceJogadorAtual() {
+        return jogo.getJogadores().indexOf(jogo.getJogadorAtual());
+    }
+    
+    public int getIndiceJogadorPorNome(String nome) {
+        for (int i = 0; i < jogo.getJogadores().size(); i++) {
+            if (jogo.getJogadores().get(i).getNome().equals(nome)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
     public String getJogadorNome(int indice) {
         if (indice >= 0 && indice < jogo.getJogadores().size()) {
             return jogo.getJogadores().get(indice).getNome();
         }
         return "";
     }
-    
+
+    public double getJogadorSaldo(int indice) {
+        if (indice >= 0 && indice < jogo.getJogadores().size()) {
+            return jogo.getJogadores().get(indice).getSaldo();
+        }
+        return 0;
+    }
+
     public int getJogadorPosicao(int indice) {
         if (indice >= 0 && indice < jogo.getJogadores().size()) {
             return jogo.getJogadores().get(indice).getPosicao();
@@ -59,22 +79,59 @@ public class JogoFacade {
         return 0;
     }
 
-    /** Lança dois dados e retorna um array com os resultados */
-    public int[] lancarDados() {
-        return new int[]{random.nextInt(6) + 1, random.nextInt(6) + 1};
+    public String[] getPropriedadesDoJogador(int indice) {
+        if (indice >= 0 && indice < jogo.getJogadores().size()) {
+            return jogo.getJogadores().get(indice).getPropriedades()
+                        .stream()
+                        .map(Propriedade::getNome)
+                        .toArray(String[]::new);
+        }
+        return new String[0];
     }
 
-    /** Move o jogador atual de acordo com o valor obtido nos dados */
-    public void moverJogadorAtual(int casas) {
-        jogo.moverJogadorAtual(casas);
+    public String getPropriedadeNome(int posicao) {
+        Propriedade p = jogo.getTabuleiro().getCasa(posicao);
+        return (p != null) ? p.getNome() : "";
     }
 
-    // === Métodos de observação (padrão Observer) ===
-    public void adicionarObservador(Observer o) {
-        jogo.adicionarObservador(o);
+    public double getPropriedadePreco(int posicao) {
+        Propriedade p = jogo.getTabuleiro().getCasa(posicao);
+        return (p != null) ? p.getPreco() : 0;
     }
 
-    public void removerObservador(Observer o) {
-        jogo.removerObservador(o);
+    public boolean propriedadeTemDono(int posicao) {
+        Propriedade p = jogo.getTabuleiro().getCasa(posicao);
+        return (p != null && p.temDono());
+    }
+
+    public String getPropriedadeDonoNome(int posicao) {
+        Propriedade p = jogo.getTabuleiro().getCasa(posicao);
+        return (p != null && p.temDono()) ? p.getDono().getNome() : null;
+    }
+
+    public int getPropriedadeCasas(int posicao) {
+        Propriedade p = jogo.getTabuleiro().getCasa(posicao);
+        return (p != null) ? p.getCasas() : 0;
+    }
+
+    public boolean getPropriedadeTemHotel(int posicao) {
+        Propriedade p = jogo.getTabuleiro().getCasa(posicao);
+        return (p != null && p.temHotel());
+    }
+
+    public String getUltimaCartaGlobal() {
+        return jogo.getUltimaCartaGlobal();
+    }
+
+    public void construirCasa() {
+        jogo.construirCasa();
+    }
+
+    public void construirHotel() {
+        jogo.construirHotel();
+    }
+
+    public void venderPropriedade() {
+        jogo.venderPropriedade();
     }
 }

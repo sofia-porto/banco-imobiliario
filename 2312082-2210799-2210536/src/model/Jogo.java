@@ -104,7 +104,6 @@ class Jogo {
     
     public void encerrarTurno() {
         avancarJogadorDaVez();
-        System.out.println("Turno encerrado. Próximo jogador: " + getJogadorAtual().getNome());
         notificarObservadores();
     }
     

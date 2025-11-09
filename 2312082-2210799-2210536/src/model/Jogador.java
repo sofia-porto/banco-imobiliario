@@ -47,13 +47,19 @@ class Jogador {
             String.format("💸 %s pagou R$%.2f para o %s", this.nome, valor, beneficiario)
         );
     }
-    
+
     void pagar(double valor) {
         saldo -= valor;
+        
         if (saldo < 0) { 
         	tentarEvitarFalencia();
-        	if (saldo < 0) {
+        	
+            if (saldo < 0) {
             	falido = true;
+                Jogo.getInstancia().setUltimoEventoLog(
+                    String.format("☠️ %s faliu e está fora do jogo!", nome)
+                );
+                Jogo.getInstancia().notificarObservadores();
             }
         }
     }
@@ -79,11 +85,13 @@ class Jogador {
     void comprarPropriedade(Propriedade p) {
         if (!p.temDono() && saldo >= p.getPreco()) {
             pagar(p.getPreco());
-            p.setDono(this);
-            propriedades.add(p);
-            Jogo.getInstancia().setUltimoEventoLog(
-                String.format("🛒 %s comprou %s por R$%.2f", this.nome, p.getNome(), p.getPreco())
-            );
+            if (!falido) {
+                p.setDono(this);
+                propriedades.add(p);
+                Jogo.getInstancia().setUltimoEventoLog(
+                    String.format("🛒 %s comprou %s por R$%.2f", this.nome, p.getNome(), p.getPreco())
+                );
+            }
         }
     }
 
@@ -134,7 +142,31 @@ class Jogador {
     }
     
     void tentarEvitarFalencia() {
-    	//TODO: Implementar na próxima iteração
+        if (saldo < 0 && !propriedades.isEmpty()) {
+            
+            Jogo.getInstancia().setUltimoEventoLog(
+                String.format("⚠️ %s está com saldo negativo! Vendendo propriedades...", nome)
+            );
+            
+            Set<Propriedade> propriedadesParaVender = new HashSet<>(propriedades);
+
+            for (Propriedade p : propriedadesParaVender) {
+                if (saldo >= 0) {
+                    break;
+                }
+                double valorVenda = p.getPreco() * 0.5;
+                
+                receber(valorVenda);
+                removerPropriedade(p);
+                p.setDono(null);
+
+                Jogo.getInstancia().setUltimoEventoLog(
+                    String.format("🏦 %s vendeu %s ao banco por R$%.2f", nome, p.getNome(), valorVenda)
+                );
+            }
+            
+            Jogo.getInstancia().notificarObservadores();
+        }
     }
 
     boolean estaPreso() { return preso; }

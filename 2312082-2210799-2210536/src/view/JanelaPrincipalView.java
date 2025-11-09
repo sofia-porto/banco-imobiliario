@@ -2,7 +2,6 @@ package view;
 
 import java.awt.*;
 import java.awt.event.*;
-import javax.swing.BoxLayout;
 import model.JogoFacade;
 import model.Observer;
 import controller.JogoController;
@@ -29,17 +28,15 @@ public class JanelaPrincipalView extends Frame implements Observer {
         tabuleiroView = new TabuleiroView(jogo, controller);
         add(tabuleiroView, BorderLayout.CENTER); 
 
-        Panel painelLateral = new Panel();
-        
-        painelLateral.setLayout(new BoxLayout(painelLateral, BoxLayout.Y_AXIS)); 
+        Panel painelLateral = new Panel(new BorderLayout());
         painelLateral.setPreferredSize(new Dimension(260, 800));
+        painelLateral.setBackground(Color.WHITE); 
 
         painelJogadorView = new PainelJogadorView(jogo, controller);
         painelLogFinanceiroView = new PainelLogFinanceiroView(jogo); 
-
         
-        painelLateral.add(painelJogadorView);
-        painelLateral.add(painelLogFinanceiroView);
+        painelLateral.add(painelJogadorView, BorderLayout.NORTH);
+        painelLateral.add(painelLogFinanceiroView, BorderLayout.CENTER);
         
         add(painelLateral, BorderLayout.EAST);
         

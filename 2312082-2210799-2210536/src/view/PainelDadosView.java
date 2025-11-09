@@ -6,10 +6,12 @@ import java.net.URL;
 import javax.imageio.ImageIO;
 import java.io.IOException;
 import model.*;
+import controller.JogoController;
 
 class PainelDadosView extends Panel implements Observer {
     private static final long serialVersionUID = 1L;
     private JogoFacade jogo;
+    private JogoController controller;
 
     private Checkbox chkManual;
     private Choice dado1, dado2;
@@ -26,8 +28,10 @@ class PainelDadosView extends Panel implements Observer {
         new Color(120, 120, 120)   // cinza
     };
 
-    public PainelDadosView(JogoFacade jogo) {
+    public PainelDadosView(JogoFacade jogo, JogoController controller) {
         this.jogo = jogo;
+        this.controller = controller;
+        
         setPreferredSize(new Dimension(260, 180));
         setBackground(Color.WHITE);
         setLayout(new FlowLayout(FlowLayout.LEFT, 10, 10));
@@ -55,15 +59,18 @@ class PainelDadosView extends Panel implements Observer {
             if (chkManual.getState()) {
                 valor1 = Integer.parseInt(dado1.getSelectedItem());
                 valor2 = Integer.parseInt(dado2.getSelectedItem());
+                
+                controller.setProximosDados(valor1, valor2);
             } else {
-                int[] valores = jogo.lancarDados();
+                int[] valores = controller.lancarDadosRandom(); 
                 valor1 = valores[0];
                 valor2 = valores[1];
             }
 
             carregarImagensDados(valor1, valor2);
             repaint();
-            jogo.moverJogadorAtual(valor1 + valor2);
+            
+            controller.realizarJogada(valor1, valor2);
         
             Window parent = (Window) this.getParent();
             if (parent instanceof Frame) {

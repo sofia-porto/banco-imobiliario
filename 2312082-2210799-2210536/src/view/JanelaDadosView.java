@@ -3,6 +3,7 @@ package view;
 import java.awt.*;
 import java.awt.event.*;
 import model.*;
+import controller.JogoController;
 
 class JanelaDadosView extends Frame implements Observer {
     private static final long serialVersionUID = 1L;
@@ -10,14 +11,14 @@ class JanelaDadosView extends Frame implements Observer {
     private JogoFacade jogo;
     private PainelDadosView painelDados;
 
-    public JanelaDadosView(JogoFacade jogo) {
+    public JanelaDadosView(JogoFacade jogo, JogoController controller) {
         this.jogo = jogo;
         setTitle("Lançar Dados");
         setSize(300, 220);
         setResizable(false);
         setLayout(new BorderLayout());
 
-        painelDados = new PainelDadosView(jogo);
+        painelDados = new PainelDadosView(jogo, controller); 
         add(painelDados, BorderLayout.CENTER);
 
         addWindowListener(new WindowAdapter() {
@@ -28,7 +29,7 @@ class JanelaDadosView extends Frame implements Observer {
     }
 
     public void abrirParaJogadorAtual() {
-        int indice = jogo.getIndiceJogadorAtual();
+        int indice = jogo.getIndiceJogadorAtual(); 
         Color cor = getCorJogador(indice);
         setBackground(cor);
         setVisible(true);
@@ -52,6 +53,8 @@ class JanelaDadosView extends Frame implements Observer {
 
     @Override
     public void atualizar() {
+        int indice = jogo.getIndiceJogadorAtual();
+        setBackground(getCorJogador(indice));
         repaint();
     }
 }

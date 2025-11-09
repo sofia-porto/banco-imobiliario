@@ -22,18 +22,18 @@ class Carta {
     public void aplicar(Jogador jogador, Jogo jogo) {
         switch (tipo) {
             case RECEBER_DO_BANCO:
-                jogador.receber(valor);
+                jogador.receber(valor, "Banco");
                 break;
 
             case PAGAR_AO_BANCO:
-                jogador.pagar(valor);
+                jogador.pagar(valor, "Banco");
                 break;
 
             case RECEBER_DOS_JOGADORES:
                 for (Jogador outro : jogo.getJogadores()) {
                     if (outro != jogador) {
-                        outro.pagar(valor);
-                        jogador.receber(valor);
+                        outro.pagar(valor, jogador);
+                        jogador.receber(valor, outro);
                     }
                 }
                 break;

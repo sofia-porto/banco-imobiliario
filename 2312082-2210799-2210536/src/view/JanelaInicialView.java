@@ -3,19 +3,23 @@ package view;
 import java.awt.*;
 import java.awt.event.*;
 import model.JogoFacade;
+import controller.JogoController; 
 
 public class JanelaInicialView extends Canvas implements KeyListener, MouseListener {
     private static final long serialVersionUID = 1L;
 
     private JogoFacade jogo;
+    private JogoController controller; 
+    
     private int numeroJogadores = 0;
     private String mensagem = "Digite um número de jogadores (3 a 6) e pressione Enter";
 
-    private Frame janela;
+    private Frame janela; 
     private boolean ativo = true;
 
-    public JanelaInicialView(JogoFacade jogo) {
+    public JanelaInicialView(JogoFacade jogo, JogoController controller) {
         this.jogo = jogo;
+        this.controller = controller; 
         addKeyListener(this);
         addMouseListener(this);
         setFocusable(true);
@@ -77,20 +81,35 @@ public class JanelaInicialView extends Canvas implements KeyListener, MouseListe
         if (numeroJogadores >= 3 && numeroJogadores <= 6) {
             jogo.criarJogadores(numeroJogadores);
             ativo = false;
-            janela.dispose();
+            
+            Frame frameAtual = this.janela; 
+            
+            janela.dispose(); 
 
-            TabuleiroView tabuleiro = new TabuleiroView(jogo);
-            tabuleiro.exibir();
+            JanelaOrdemView janelaOrdem = new JanelaOrdemView(frameAtual, jogo);
+            
+            janelaOrdem.setLocationRelativeTo(frameAtual); 
+            janelaOrdem.setVisible(true); 
+            
+            JanelaPrincipalView janelaPrincipal = new JanelaPrincipalView(jogo, controller);
+            janelaPrincipal.exibir();
+            
         } else {
             mensagem = "Número inválido! Escolha entre 3 e 6.";
         }
     }
-
-    // Métodos obrigatórios
+    
     @Override public void keyPressed(KeyEvent e) {}
     @Override public void keyReleased(KeyEvent e) {}
     @Override public void mousePressed(MouseEvent e) {}
     @Override public void mouseReleased(MouseEvent e) {}
     @Override public void mouseEntered(MouseEvent e) {}
     @Override public void mouseExited(MouseEvent e) {}
+
+    public static void main(String[] args) {
+        JogoFacade jogo = new JogoFacade();
+        JogoController controller = new JogoController(jogo); 
+        JanelaInicialView janela = new JanelaInicialView(jogo, controller); 
+        janela.exibir();
+    }
 }

@@ -1,12 +1,12 @@
 package model;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Random;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 class Jogo {
-    private static Jogo instancia;
+    private static Jogo instancia; 
     private Jogo() {
         jogadores = new ArrayList<>();
         tabuleiro = new Tabuleiro();
@@ -24,7 +24,10 @@ class Jogo {
     private Tabuleiro tabuleiro;
     private int jogadorAtual; 
     private List<Observer> observadores = new ArrayList<>();
-    private String ultimaCartaGlobal;
+    
+    private String ultimaCartaGlobal; 
+    
+    private String ultimoEventoLog; 
 
     public void adicionarJogador(Jogador j) {
         jogadores.add(j);
@@ -32,33 +35,52 @@ class Jogo {
     }
 
     public void iniciarPartida() {
-        sortearOrdemJogadores();
         jogadorAtual = 0;
         notificarObservadores();
-        System.out.println("🎯 Ordem de jogo definida:");
-        for (int i = 0; i < jogadores.size(); i++) {
-            System.out.println("  " + (i+1) + "º: " + jogadores.get(i).getNome());
-        }
-    }
-    
-    private void sortearOrdemJogadores() {
-        if (jogadores.size() <= 1) return;
-        Collections.shuffle(jogadores, new Random());
     }
 
     public Jogador getJogadorAtual() {
         return jogadores.get(jogadorAtual);
     }
+    
+    public int getIndiceJogadorAtual() {
+        return this.jogadorAtual;
+    }
+
+    public int getIndicePorNome(String nome) {
+        if (nome == null) return -1;
+        for (int i = 0; i < jogadores.size(); i++) {
+            if (nome.equals(jogadores.get(i).getNome())) {
+                return i;
+            }
+        }
+        return -1;
+    }
 
     public List<Jogador> getJogadores() {
         return jogadores;
+    }
+    
+    public double getJogadorSaldo(int indice) {
+        if (indice >= 0 && indice < jogadores.size()) {
+            return jogadores.get(indice).getSaldo();
+        }
+        return 0.0;
+    }
+
+    public Set<String> getPropriedadesDoJogador(int indice) {
+        if (indice >= 0 && indice < jogadores.size()) {
+            return jogadores.get(indice).getPropriedades().stream()
+                .map(Propriedade::getNome)
+                .collect(Collectors.toSet());
+        }
+        return null;
     }
 
     public void proximaJogada(int valorDado) {
         Jogador j = getJogadorAtual();
         j.mover(valorDado, tabuleiro.tamanho());
         tabuleiro.verificarCasaAtual(j);
-        tabuleiro.processaAluguel(j);
         avancarJogadorDaVez();
         notificarObservadores();
     }
@@ -68,13 +90,22 @@ class Jogo {
     }
     
     void moverJogadorAtual(int casas) {
+        this.ultimaCartaGlobal = null;
+        this.ultimoEventoLog = null;
+        
         Jogador atual = getJogadorAtual();
         if (atual != null && !atual.estaPreso()) {
             atual.mover(casas, tabuleiro.tamanho());
-            tabuleiro.verificarCasaAtual(atual);
+            tabuleiro.verificarCasaAtual(atual); 
+            
             notificarObservadores();
-            avancarJogadorDaVez();
         }
+    }
+    
+    public void encerrarTurno() {
+        avancarJogadorDaVez();
+        System.out.println("Turno encerrado. Próximo jogador: " + getJogadorAtual().getNome());
+        notificarObservadores();
     }
     
     public void setUltimaCartaGlobal(String id) {
@@ -84,9 +115,78 @@ class Jogo {
     public String getUltimaCartaGlobal() {
         return ultimaCartaGlobal;
     }
+
+    public void setUltimoEventoLog(String msg) {
+        System.out.println(msg); 
+        this.ultimoEventoLog = msg;
+    }
+
+    public String getUltimoEventoLog() {
+        return this.ultimoEventoLog;
+    }
     
-    public void limparCartaGlobal() {
-        ultimaCartaGlobal = null;
+    public boolean comprarPropriedadeAtual() {
+        Jogador j = getJogadorAtual();
+        Propriedade p = tabuleiro.getCasa(j.getPosicao());
+        j.comprarPropriedade(p); 
+        notificarObservadores(); 
+        return p.getDono() == j; 
+    }
+    
+    public boolean construirCasa(String nomePropriedade) {
+        Jogador j = getJogadorAtual();
+        Propriedade p = tabuleiro.getPropriedadePorNome(nomePropriedade);
+
+        if (p != null && p.getDono() == j) {
+            double custoConstrucao = p.getPreco() * 0.5;
+            if (j.getSaldo() >= custoConstrucao && p.getCasas() < 4) {
+                p.construirCasa();
+                j.pagar(custoConstrucao, "Banco"); 
+                setUltimoEventoLog("🏠 " + j.getNome() + " construiu 1 casa em " + p.getNome()); 
+                notificarObservadores();
+                return true;
+            }
+        }
+        setUltimoEventoLog("❌ Não foi possível construir casa em " + nomePropriedade);
+        notificarObservadores();
+        return false;
+    }
+    
+    public boolean construirHotel(String nomePropriedade) {
+        Jogador j = getJogadorAtual();
+        Propriedade p = tabuleiro.getPropriedadePorNome(nomePropriedade);
+
+        if (p != null && p.getDono() == j) {
+            double custoConstrucao = p.getPreco() * 0.5; 
+            if (j.getSaldo() >= custoConstrucao && p.getCasas() == 4 && !p.temHotel()) {
+                p.construirHotel();
+                j.pagar(custoConstrucao, "Banco"); 
+                setUltimoEventoLog("🏨 " + j.getNome() + " construiu 1 hotel em " + p.getNome());
+                notificarObservadores();
+                return true;
+            }
+        }
+        setUltimoEventoLog("❌ Não foi possível construir hotel em " + nomePropriedade);
+        notificarObservadores();
+        return false;
+    }
+    
+    public boolean venderPropriedade(String nomePropriedade) {
+        Jogador j = getJogadorAtual();
+        Propriedade p = tabuleiro.getPropriedadePorNome(nomePropriedade);
+
+        if (p != null && p.getDono() == j) {
+            double valorVenda = p.getPreco() * 0.5;
+            j.receber(valorVenda, "Banco"); 
+            j.removerPropriedade(p); 
+            p.setDono(null); 
+            setUltimoEventoLog("🏦 " + j.getNome() + " vendeu " + p.getNome() + " ao banco.");
+            notificarObservadores();
+            return true;
+        }
+        setUltimoEventoLog("❌ Não foi possível vender " + nomePropriedade);
+        notificarObservadores();
+        return false;
     }
 
     public void adicionarObservador(Observer o) {
@@ -102,74 +202,8 @@ class Jogo {
             o.atualizar();
         }
     }
-
+    
     public Tabuleiro getTabuleiro() {
         return tabuleiro;
-    }
-    
-    void construirCasa() {
-        Jogador jogador = getJogadorAtual();
-        Propriedade prop = tabuleiro.getCasa(jogador.getPosicao());
-
-        if (prop != null && prop.getDono() == jogador) {
-            double custo = prop.getPreco() * 0.5;
-            if (jogador.getSaldo() >= custo) {
-                if (prop.getCasas() < 4 && !prop.temHotel()) {
-                    jogador.pagar(custo);
-                    prop.construirCasa();
-                    System.out.println(jogador.getNome() + " construiu uma casa em " + prop.getNome() +
-                            " → total de casas: " + prop.getCasas() +
-                            " → saldo: R$" + jogador.getSaldo());
-                } else {
-                    System.out.println(prop.getNome() + " já possui o máximo de casas ou um hotel.");
-                }
-            } else {
-                System.out.println(jogador.getNome() + " não tem saldo para construir em " + prop.getNome());
-            }
-        } else {
-            System.out.println("Só é possível construir em uma propriedade que pertença ao jogador da vez.");
-        }
-        notificarObservadores();
-    }
-
-    void construirHotel() {
-        Jogador jogador = getJogadorAtual();
-        Propriedade prop = tabuleiro.getCasa(jogador.getPosicao());
-
-        if (prop != null && prop.getDono() == jogador) {
-            double custo = prop.getPreco();
-            if (jogador.getSaldo() >= custo) {
-                if (prop.getCasas() >= 4 && !prop.temHotel()) {
-                    jogador.pagar(custo);
-                    prop.construirHotel();
-                    System.out.println(jogador.getNome() + " construiu um HOTEL em " + prop.getNome() +
-                            " → saldo: R$" + jogador.getSaldo());
-                } else {
-                    System.out.println(prop.getNome() + " ainda não tem 4 casas ou já possui um hotel.");
-                }
-            } else {
-                System.out.println(jogador.getNome() + " não tem saldo para construir um hotel em " + prop.getNome());
-            }
-        } else {
-            System.out.println("Só é possível construir em uma propriedade que pertença ao jogador da vez.");
-        }
-        notificarObservadores();
-    }
-
-    void venderPropriedade() {
-        Jogador jogador = getJogadorAtual();
-        Propriedade prop = tabuleiro.getCasa(jogador.getPosicao());
-
-        if (prop != null && prop.getDono() == jogador) {
-            double valorVenda = prop.getPreco() * 0.8;
-            jogador.receber(valorVenda);
-            prop.setDono(null);
-            jogador.getPropriedades().remove(prop);
-            System.out.println(jogador.getNome() + " vendeu " + prop.getNome() +
-                    " por R$" + valorVenda + " → novo saldo: R$" + jogador.getSaldo());
-        } else {
-            System.out.println(jogador.getNome() + " não é dono da propriedade atual ou ela não é vendável.");
-        }
-        notificarObservadores();
     }
 }

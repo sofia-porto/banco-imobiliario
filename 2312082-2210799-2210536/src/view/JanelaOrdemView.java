@@ -7,7 +7,7 @@ import javax.imageio.ImageIO;
 import java.io.IOException;
 import model.*;
 
-class JanelaOrdemView extends Frame {
+class JanelaOrdemView extends Dialog { 
 
     private static final long serialVersionUID = 1L;
     private JogoFacade jogo;
@@ -21,9 +21,10 @@ class JanelaOrdemView extends Frame {
         new Color(120, 120, 120)   // cinza
     };
 
-    public JanelaOrdemView(JogoFacade jogo) {
+    public JanelaOrdemView(Frame owner, JogoFacade jogo) {
+        super(owner, "Ordem dos Jogadores", true);
+        
         this.jogo = jogo;
-        setTitle("Ordem dos Jogadores");
         setSize(340, 320);
         setLayout(new BorderLayout());
         setResizable(false);
@@ -49,7 +50,6 @@ class JanelaOrdemView extends Frame {
                     public void paint(Graphics g) {
                         g.drawImage(pin, 0, 0, 24, 24, this);
                     }
-
                     public Dimension getPreferredSize() {
                         return new Dimension(28, 28);
                     }
@@ -60,7 +60,6 @@ class JanelaOrdemView extends Frame {
                         g.setColor(cores[idx]);
                         g.fillOval(5, 5, 18, 18);
                     }
-
                     public Dimension getPreferredSize() {
                         return new Dimension(28, 28);
                     }

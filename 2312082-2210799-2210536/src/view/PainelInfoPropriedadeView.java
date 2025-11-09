@@ -43,7 +43,14 @@ class PainelInfoPropriedadeView extends Panel implements Observer {
 
         if (nomePropriedade == null || cartaImg == null) {
             g.setFont(new Font("Arial", Font.PLAIN, 12));
-            g.drawString("Nenhuma propriedade selecionada", 20, 60);
+            g.drawString("Nenhuma propriedade selecionada.", 20, 60);
+            
+            // Verifica se a casa atual é comprável para dar a msg correta
+            int indiceJogador = jogo.getIndiceJogadorAtual();
+            int posicao = jogo.getJogadorPosicao(indiceJogador);
+            if (jogo.getPropriedadePreco(posicao) <= 0) {
+                 g.drawString("(Casa atual não é comprável)", 20, 75);
+            }
             return;
         }
 
@@ -68,8 +75,10 @@ class PainelInfoPropriedadeView extends Panel implements Observer {
         int posicao = jogo.getJogadorPosicao(indiceJogador);
 
         nomePropriedade = jogo.getPropriedadeNome(posicao);
-        if (nomePropriedade == null || nomePropriedade.isEmpty()) {
+        
+        if (nomePropriedade == null || jogo.getPropriedadePreco(posicao) <= 0) {
             cartaImg = null;
+            this.nomePropriedade = null;
             repaint();
             return;
         }
@@ -81,7 +90,7 @@ class PainelInfoPropriedadeView extends Panel implements Observer {
         nomeDono = jogo.getPropriedadeDonoNome(posicao);
 
         if (temDono) {
-            int donoIndex = jogo.getIndiceJogadorPorNome(nomeDono);
+            int donoIndex = jogo.getIndiceJogadorPorNome(nomeDono); 
             if (donoIndex >= 0 && donoIndex < coresJogadores.length) {
                 corDono = coresJogadores[donoIndex];
             }
@@ -94,11 +103,13 @@ class PainelInfoPropriedadeView extends Panel implements Observer {
 
     private Image carregarCartaPropriedade(String nome) {
         try {
-            URL url = getClass().getResource("/resources/" + nome + ".png");
+            String nomeArquivo = nome + ".png";
+            
+            URL url = getClass().getResource("/resources/" + nomeArquivo);
             if (url != null) {
                 return ImageIO.read(url);
             } else {
-                System.out.println("Carta não encontrada: " + nome + ".png");
+                System.out.println("⚠️ Imagem da carta não encontrada: " + nomeArquivo);
                 return null;
             }
         } catch (IOException e) {

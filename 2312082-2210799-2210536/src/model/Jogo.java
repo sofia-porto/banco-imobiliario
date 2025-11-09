@@ -2,14 +2,11 @@ package model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-import view.TabuleiroView;
-
-// Classe Singleton que gerencia o jogo
 class Jogo {
-
-    // ===================== SINGLETON =====================
-    private static Jogo instancia; // única instância do jogo
+    private static Jogo instancia; 
     private Jogo() {
         jogadores = new ArrayList<>();
         tabuleiro = new Tabuleiro();
@@ -23,14 +20,15 @@ class Jogo {
         return instancia;
     }
 
-    // ===================== ATRIBUTOS =====================
     private List<Jogador> jogadores;
     private Tabuleiro tabuleiro;
-    private int jogadorAtual; // índice do jogador da vez
+    private int jogadorAtual; 
     private List<Observer> observadores = new ArrayList<>();
-    private String ultimaCartaGlobal;
+    
+    private String ultimaCartaGlobal; 
+    
+    private String ultimoEventoLog; 
 
-    // ===================== MÉTODOS DO JOGO =====================
     public void adicionarJogador(Jogador j) {
         jogadores.add(j);
         notificarObservadores();
@@ -44,16 +42,45 @@ class Jogo {
     public Jogador getJogadorAtual() {
         return jogadores.get(jogadorAtual);
     }
+    
+    public int getIndiceJogadorAtual() {
+        return this.jogadorAtual;
+    }
+
+    public int getIndicePorNome(String nome) {
+        if (nome == null) return -1;
+        for (int i = 0; i < jogadores.size(); i++) {
+            if (nome.equals(jogadores.get(i).getNome())) {
+                return i;
+            }
+        }
+        return -1;
+    }
 
     public List<Jogador> getJogadores() {
         return jogadores;
+    }
+    
+    public double getJogadorSaldo(int indice) {
+        if (indice >= 0 && indice < jogadores.size()) {
+            return jogadores.get(indice).getSaldo();
+        }
+        return 0.0;
+    }
+
+    public Set<String> getPropriedadesDoJogador(int indice) {
+        if (indice >= 0 && indice < jogadores.size()) {
+            return jogadores.get(indice).getPropriedades().stream()
+                .map(Propriedade::getNome)
+                .collect(Collectors.toSet());
+        }
+        return null;
     }
 
     public void proximaJogada(int valorDado) {
         Jogador j = getJogadorAtual();
         j.mover(valorDado, tabuleiro.tamanho());
         tabuleiro.verificarCasaAtual(j);
-        tabuleiro.processaAluguel(j);
         avancarJogadorDaVez();
         notificarObservadores();
     }
@@ -63,13 +90,22 @@ class Jogo {
     }
     
     void moverJogadorAtual(int casas) {
+        this.ultimaCartaGlobal = null;
+        this.ultimoEventoLog = null;
+        
         Jogador atual = getJogadorAtual();
         if (atual != null && !atual.estaPreso()) {
             atual.mover(casas, tabuleiro.tamanho());
-            tabuleiro.verificarCasaAtual(atual);
+            tabuleiro.verificarCasaAtual(atual); 
+            
             notificarObservadores();
-            avancarJogadorDaVez();
         }
+    }
+    
+    public void encerrarTurno() {
+        avancarJogadorDaVez();
+        System.out.println("Turno encerrado. Próximo jogador: " + getJogadorAtual().getNome());
+        notificarObservadores();
     }
     
     public void setUltimaCartaGlobal(String id) {
@@ -80,7 +116,79 @@ class Jogo {
         return ultimaCartaGlobal;
     }
 
-    // ===================== OBSERVER =====================
+    public void setUltimoEventoLog(String msg) {
+        System.out.println(msg); 
+        this.ultimoEventoLog = msg;
+    }
+
+    public String getUltimoEventoLog() {
+        return this.ultimoEventoLog;
+    }
+    
+    public boolean comprarPropriedadeAtual() {
+        Jogador j = getJogadorAtual();
+        Propriedade p = tabuleiro.getCasa(j.getPosicao());
+        j.comprarPropriedade(p); 
+        notificarObservadores(); 
+        return p.getDono() == j; 
+    }
+    
+    public boolean construirCasa(String nomePropriedade) {
+        Jogador j = getJogadorAtual();
+        Propriedade p = tabuleiro.getPropriedadePorNome(nomePropriedade);
+
+        if (p != null && p.getDono() == j) {
+            double custoConstrucao = p.getPreco() * 0.5;
+            if (j.getSaldo() >= custoConstrucao && p.getCasas() < 4) {
+                p.construirCasa();
+                j.pagar(custoConstrucao, "Banco"); 
+                setUltimoEventoLog("🏠 " + j.getNome() + " construiu 1 casa em " + p.getNome()); 
+                notificarObservadores();
+                return true;
+            }
+        }
+        setUltimoEventoLog("❌ Não foi possível construir casa em " + nomePropriedade);
+        notificarObservadores();
+        return false;
+    }
+    
+    public boolean construirHotel(String nomePropriedade) {
+        Jogador j = getJogadorAtual();
+        Propriedade p = tabuleiro.getPropriedadePorNome(nomePropriedade);
+
+        if (p != null && p.getDono() == j) {
+            double custoConstrucao = p.getPreco() * 0.5; 
+            if (j.getSaldo() >= custoConstrucao && p.getCasas() == 4 && !p.temHotel()) {
+                p.construirHotel();
+                j.pagar(custoConstrucao, "Banco"); 
+                setUltimoEventoLog("🏨 " + j.getNome() + " construiu 1 hotel em " + p.getNome());
+                notificarObservadores();
+                return true;
+            }
+        }
+        setUltimoEventoLog("❌ Não foi possível construir hotel em " + nomePropriedade);
+        notificarObservadores();
+        return false;
+    }
+    
+    public boolean venderPropriedade(String nomePropriedade) {
+        Jogador j = getJogadorAtual();
+        Propriedade p = tabuleiro.getPropriedadePorNome(nomePropriedade);
+
+        if (p != null && p.getDono() == j) {
+            double valorVenda = p.getPreco() * 0.5;
+            j.receber(valorVenda, "Banco"); 
+            j.removerPropriedade(p); 
+            p.setDono(null); 
+            setUltimoEventoLog("🏦 " + j.getNome() + " vendeu " + p.getNome() + " ao banco.");
+            notificarObservadores();
+            return true;
+        }
+        setUltimoEventoLog("❌ Não foi possível vender " + nomePropriedade);
+        notificarObservadores();
+        return false;
+    }
+
     public void adicionarObservador(Observer o) {
         observadores.add((Observer) o);
     }
@@ -94,10 +202,8 @@ class Jogo {
             o.atualizar();
         }
     }
-
-    // ===================== GETTERS AUXILIARES =====================
+    
     public Tabuleiro getTabuleiro() {
         return tabuleiro;
     }
 }
-

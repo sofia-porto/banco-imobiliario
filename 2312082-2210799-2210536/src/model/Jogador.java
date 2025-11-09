@@ -34,6 +34,20 @@ class Jogador {
         }
     }
 
+    void pagar(double valor, Jogador beneficiario) {
+        pagar(valor);
+        Jogo.getInstancia().setUltimoEventoLog(
+            String.format("💸 %s pagou R$%.2f para %s", this.nome, valor, beneficiario.getNome())
+        );
+    }
+    
+    void pagar(double valor, String beneficiario) { 
+        pagar(valor);
+        Jogo.getInstancia().setUltimoEventoLog(
+            String.format("💸 %s pagou R$%.2f para o %s", this.nome, valor, beneficiario)
+        );
+    }
+    
     void pagar(double valor) {
         saldo -= valor;
         if (saldo < 0) { 
@@ -42,12 +56,24 @@ class Jogador {
             	falido = true;
             }
         }
-        System.out.println("💰 Jogador pagou R$" + valor + " → saldo: R$" + saldo);
+    }
+
+    void receber(double valor, Jogador pagador) {
+        receber(valor); 
+        Jogo.getInstancia().setUltimoEventoLog(
+            String.format("💰 %s recebeu R$%.2f de %s", this.nome, valor, pagador.getNome())
+        );
+    }
+    
+    void receber(double valor, String pagador) {
+        receber(valor);
+        Jogo.getInstancia().setUltimoEventoLog(
+             String.format("💰 %s recebeu R$%.2f do %s", this.nome, valor, pagador)
+        );
     }
 
     void receber(double valor) {
         saldo += valor;
-        System.out.println("💰 Jogador recebeu R$" + valor + " → saldo: R$" + saldo);
     }
 
     void comprarPropriedade(Propriedade p) {
@@ -55,49 +81,56 @@ class Jogador {
             pagar(p.getPreco());
             p.setDono(this);
             propriedades.add(p);
-            System.out.println(" Jogador comprou a propriedade " + p.getNome() + " → saldo: R$" + saldo);
+            Jogo.getInstancia().setUltimoEventoLog(
+                String.format("🛒 %s comprou %s por R$%.2f", this.nome, p.getNome(), p.getPreco())
+            );
         }
     }
 
-    void prender() { // Cair na casa "Vá para a Prisão"
+    void removerPropriedade(Propriedade p) {
+        if (p != null) {
+            propriedades.remove(p);
+        }
+    }
+
+    void prender() { 
     	if (temCartaoSaidaLivre) {
     		usarCartaoSaidaLivre();
     	} else {
     		  preso = true;
-    	      posicao = 10; // posição da casa "Prisão" conforme tabuleiro real
+    	      posicao = 10; 
     	      duplasSeguidas = 0;
+              Jogo.getInstancia().setUltimoEventoLog("🚓 " + this.nome + " foi para a Prisão!");
     	}
     }
 
-    void registrarDupla() { // Tirar três duplas seguidas
+    void registrarDupla() { 
         duplasSeguidas++;
         if (duplasSeguidas == 3) {
             prender();
         }
     }
 
-    void resetarDuplas() {
-        duplasSeguidas = 0;
-    }
+    void resetarDuplas() { duplasSeguidas = 0; }
 
-    void tentarSairDaPrisaoComDupla() { // Sair da prisão tirando uma dupla
+    void tentarSairDaPrisaoComDupla() { 
         if (preso) {
             preso = false;
             duplasSeguidas = 0;
         }
     }
 
-    void usarCartaoSaidaLivre() { // Sair com o cartão “Saída Livre da Prisão”
+    void usarCartaoSaidaLivre() { 
         if (preso && temCartaoSaidaLivre) {
             preso = false;
-            temCartaoSaidaLivre = false; // consome o cartão
-            System.out.println("🃏 Você usou sua carta de Saída da Prisão!");
+            temCartaoSaidaLivre = false; 
+            Jogo.getInstancia().setUltimoEventoLog("🃏 " + this.nome + " usou a carta de Saída Livre da Prisão!");
         }
     }
 
     void receberCartaoSaidaLivre() {
         temCartaoSaidaLivre = true;
-        System.out.println("🃏 Você recebeu uma carta de Saída da Prisão!");
+        Jogo.getInstancia().setUltimoEventoLog("🃏 " + this.nome + " recebeu uma carta de Saída Livre da Prisão!");
     }
     
     void tentarEvitarFalencia() {
@@ -107,18 +140,11 @@ class Jogador {
     boolean estaPreso() { return preso; }
     boolean estaFalido() { return falido; }
     boolean temCartaoSaidaLivre() { return temCartaoSaidaLivre; }
-
     int getPosicao() { return posicao; }
     double getSaldo() { return saldo; }
     String getNome() { return nome; }
-
     Set<Propriedade> getPropriedades() { return propriedades; }
-    
     public void setUltimaCarta(String id) { this.ultimaCartaId = id; }
     public String getUltimaCarta() { return ultimaCartaId; }
-
-    public Piao getPiao() {
-        return piao;
-    }
-
+    public Piao getPiao() { return piao; }
 }

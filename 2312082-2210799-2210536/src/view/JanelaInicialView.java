@@ -3,19 +3,23 @@ package view;
 import java.awt.*;
 import java.awt.event.*;
 import model.JogoFacade;
+import controller.JogoController; 
 
 public class JanelaInicialView extends Canvas implements KeyListener, MouseListener {
     private static final long serialVersionUID = 1L;
 
     private JogoFacade jogo;
+    private JogoController controller; 
+    
     private int numeroJogadores = 0;
     private String mensagem = "Digite um número de jogadores (3 a 6) e pressione Enter";
 
-    private Frame janela; // substitui JFrame
+    private Frame janela; 
     private boolean ativo = true;
 
-    public JanelaInicialView(JogoFacade jogo) {
+    public JanelaInicialView(JogoFacade jogo, JogoController controller) {
         this.jogo = jogo;
+        this.controller = controller; 
         addKeyListener(this);
         addMouseListener(this);
         setFocusable(true);
@@ -33,7 +37,6 @@ public class JanelaInicialView extends Canvas implements KeyListener, MouseListe
             }
         });
 
-        // Loop de renderização (sem Swing)
         while (ativo) {
             repaint();
             try { Thread.sleep(16); } catch (InterruptedException e) {}
@@ -44,11 +47,9 @@ public class JanelaInicialView extends Canvas implements KeyListener, MouseListe
     public void paint(Graphics g) {
         Graphics2D g2 = (Graphics2D) g;
 
-        // fundo branco
         g2.setColor(Color.WHITE);
         g2.fillRect(0, 0, getWidth(), getHeight());
 
-        // título e mensagens
         g2.setColor(Color.BLACK);
         g2.setFont(new Font("Arial", Font.BOLD, 18));
         g2.drawString(mensagem, 80, 150);
@@ -80,17 +81,24 @@ public class JanelaInicialView extends Canvas implements KeyListener, MouseListe
         if (numeroJogadores >= 3 && numeroJogadores <= 6) {
             jogo.criarJogadores(numeroJogadores);
             ativo = false;
-            janela.dispose();
+            
+            Frame frameAtual = this.janela; 
+            
+            janela.dispose(); 
 
-            // abre tabuleiro sem Swing
-            TabuleiroView tabuleiro = new TabuleiroView(jogo);
-            tabuleiro.exibir();
+            JanelaOrdemView janelaOrdem = new JanelaOrdemView(frameAtual, jogo);
+            
+            janelaOrdem.setLocationRelativeTo(frameAtual); 
+            janelaOrdem.setVisible(true); 
+            
+            JanelaPrincipalView janelaPrincipal = new JanelaPrincipalView(jogo, controller);
+            janelaPrincipal.exibir();
+            
         } else {
             mensagem = "Número inválido! Escolha entre 3 e 6.";
         }
     }
-
-    // Métodos obrigatórios
+    
     @Override public void keyPressed(KeyEvent e) {}
     @Override public void keyReleased(KeyEvent e) {}
     @Override public void mousePressed(MouseEvent e) {}
@@ -98,10 +106,10 @@ public class JanelaInicialView extends Canvas implements KeyListener, MouseListe
     @Override public void mouseEntered(MouseEvent e) {}
     @Override public void mouseExited(MouseEvent e) {}
 
-    // Método main para testar isoladamente
     public static void main(String[] args) {
         JogoFacade jogo = new JogoFacade();
-        JanelaInicialView janela = new JanelaInicialView(jogo);
+        JogoController controller = new JogoController(jogo); 
+        JanelaInicialView janela = new JanelaInicialView(jogo, controller); 
         janela.exibir();
     }
 }
